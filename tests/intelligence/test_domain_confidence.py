@@ -14,7 +14,7 @@ def test_analyze_alone_does_not_imply_repository_intelligence():
     )
     identity = _identity(scan)
     assert identity.domain != "repository_intelligence"
-    assert "exact product purpose is not fully specified" in identity.purpose_summary.lower()
+    assert "coherent workflow" in identity.purpose_summary.lower()
 
 
 def test_fastapi_mongodb_analyze_falls_back_to_backend_api():
@@ -27,7 +27,8 @@ def test_fastapi_mongodb_analyze_falls_back_to_backend_api():
     )
     identity = _identity(scan)
     assert identity.domain in {"generic_backend", "unknown"}
-    assert "backend api service" in identity.purpose_summary.lower() or "exact product purpose is not fully specified" in identity.purpose_summary.lower()
+    assert "backend api service" in identity.purpose_summary.lower()
+    assert "coherent workflow" in identity.purpose_summary.lower()
 
 
 def test_hallucination_detector_classified_from_claim_and_scraper_signals():
@@ -114,7 +115,7 @@ def test_react_vite_frontend_not_repo_intelligence():
     assert "frontend application" in text
     assert "react" in text
     assert "vite" in text
-    assert "exact product purpose is not fully specified" in text
+    assert "maintainable workflow" in text
 
 
 def test_ahal_ai_still_repo_intelligence():

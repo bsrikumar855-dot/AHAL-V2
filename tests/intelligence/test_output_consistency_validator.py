@@ -39,7 +39,7 @@ def test_generation_failed_rewritten_to_conservative_fallback():
         setup_notes=PRDSection(title="Setup", content="Setup", confidence="low"),
         confidence="low",
     )
-    identity = ProductIdentity(purpose_summary="The exact product purpose is not fully specified in the analyzed evidence.")
+    identity = ProductIdentity(purpose_summary="Product purpose evidence is partial, so the summary stays grounded in detected workflow signals.")
     validated = OutputConsistencyValidator().validate_prd(prd, identity)
     assert "generation failed" not in validated.overview.content.lower()
 

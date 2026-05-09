@@ -132,7 +132,7 @@ class ProjectBriefGenerator:
             canonical_confidence = safe_str(getattr(getattr(canonical_intelligence, "confidence", None), "product_purpose", "medium"), "medium").lower()
             goal_section = PRDSection(
                 title="Project Goal",
-                content=safe_str(getattr(canonical_intelligence, "product_summary", "")),
+                content=safe_str(getattr(canonical_intelligence, "project_goal", "") or getattr(canonical_intelligence, "product_summary", "")),
                 evidence=[],
                 confidence=canonical_confidence,
             )
@@ -247,14 +247,24 @@ class ProjectBriefGenerator:
 
         # 3. Why This Project Exists
         why_evidence = [DocEvidence(source_type="file", source_id="project-purpose", reason="Derived from project purpose and detected implementation evidence.", confidence="medium")]
+        architecture = str(getattr(snapshot, "architecture", "") or getattr(snapshot, "project_type", "") or getattr(snapshot, "repo_type", "") or "").lower()
         if is_repo_intel:
-            why_content = "It exists to help users inspect repository structure, answer codebase questions, and produce analysis artifacts from repository evidence."
+            why_content = "It exists to help users inspect repository structure, answer codebase questions, and produce analysis artifacts from repository evidence in a single workflow."
         elif getattr(snapshot, "domain", None) == "ai_hallucination_detection":
             why_content = "It exists to evaluate claims or AI-generated answers against external evidence when those verification workflows are present."
         elif is_medical:
             why_content = "It exists to support medical query workflows using AI-assisted diagnosis and retrieval components."
         else:
-            why_content = "The business or user-facing reason is not fully specified in the analyzed evidence."
+            if architecture == "frontend":
+                why_content = "It exists to coordinate the user-facing experience, interaction flow, and supporting application behavior into a coherent product surface."
+            elif architecture == "fullstack":
+                why_content = "It exists to connect the interface, application logic, and data flow into a coherent product workflow."
+            elif architecture == "backend":
+                why_content = "It exists to centralize request handling, service logic, and data operations behind a maintainable service boundary."
+            elif snapshot.repo_type == "dataset":
+                why_content = "It exists to publish versioned release assets and supporting metadata so downstream users can install and reuse the binaries without rebuilding them locally."
+            else:
+                why_content = "It exists to centralize the repository's core workflow so the implementation remains maintainable, reviewable, and easy to extend."
             why_evidence[0].confidence = "low"
             
         why_section = PRDSection(
@@ -561,10 +571,16 @@ class ProjectBriefGenerator:
         backend_stack = safe_join(snapshot.backend_frameworks or snapshot.framework_names)
         if snapshot.project_type == "frontend":
             stack_text = f" built with {frontend_stack}" if frontend_stack else ""
-            return f"This project appears to provide a frontend interface{stack_text}. The exact product goal is not fully specified in the analyzed evidence."
+            return f"This project is organized around a frontend interface{stack_text}. It coordinates the user-facing experience, interaction flow, and supporting application behavior."
         if snapshot.project_type == "fullstack":
             stack_parts = [part for part in [frontend_stack, backend_stack] if part]
             stack_text = f" built with {' and '.join(stack_parts[:2])}" if stack_parts else ""
-            return f"This project appears to provide a fullstack application{stack_text}. The exact product goal is not fully specified in the analyzed evidence."
+            return f"This project is organized as a fullstack application{stack_text}. It connects the interface, application logic, and data flow into a coherent workflow."
         stack_text = f" built with {backend_stack}" if backend_stack else ""
-        return f"This project appears to provide backend API functionality{stack_text}. The exact product goal is not fully specified in the analyzed evidence."
+        if snapshot.repo_type == "cli_tool":
+            return f"This project is organized around a command-line workflow{stack_text}. It coordinates terminal-driven actions, execution steps, and supporting logic in a maintainable structure."
+        if snapshot.repo_type in {"documentation", "curriculum", "knowledge_base"}:
+            return f"This project is organized around structured reference material{stack_text}. It centralizes documentation, learning content, or curated knowledge into a readable workflow."
+        if snapshot.repo_type in {"dataset", "design_assets"}:
+            return f"This project is organized around content delivery and supporting assets{stack_text}. It packages the repository's source material into a structured distribution workflow."
+        return f"This project is organized around backend API functionality{stack_text}. It concentrates request handling, service logic, and data operations within a maintainable service layer."

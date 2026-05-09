@@ -35,7 +35,7 @@ def test_product_identity_rejects_image_markup_candidate():
     scan = noisy_fullstack_scan()
     identity = ProductIdentityResolver().resolve(scan_result=scan, intelligence_result=IntelligenceEngine().analyze(scan))
 
-    assert identity.project_name == "Create And Activate Virtual Environment"
+    assert identity.project_name is None
     assert "<p" not in identity.purpose_summary.lower()
     assert "logo-chatgpt-transparent" not in identity.purpose_summary.lower()
 
@@ -48,11 +48,7 @@ def test_canonical_summary_never_contains_html():
 
     for token in ("<", ">", "img", "src=", "alt=", "width=", ".png"):
         assert token not in combined
-    assert canonical.product_summary == (
-        "Create And Activate Virtual Environment appears to be a fullstack application. "
-        "The exact product purpose is not fully specified in the analyzed evidence."
-    )
-    assert canonical.what == (
-        "Create And Activate Virtual Environment appears to be a fullstack application based on the detected frontend and backend structure."
-    )
-    assert canonical.why == "The business or user-facing reason is not fully specified in the analyzed evidence."
+    assert canonical.project_name == "Analyzed Project"
+    assert "Create And Activate Virtual Environment" not in canonical.product_summary
+    assert "Create And Activate Virtual Environment" not in canonical.what
+    assert "Create And Activate Virtual Environment" not in canonical.why

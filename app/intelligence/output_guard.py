@@ -73,7 +73,7 @@ class CanonicalOutputGuard:
         sanitized.what = cls._sanitize_field_text(sanitized.what, sanitized, prefer_summary=False)
         sanitized.why = cls.sanitize_why(sanitized)
         if cls._should_strip_ahal_why(sanitized):
-            sanitized.why = "The business or user-facing reason is not fully specified in the analyzed evidence."
+            sanitized.why = cls._conservative_fallback(sanitized, field="why")
         sanitized.architecture_summary = cls.sanitize_text(sanitized.architecture_summary, sanitized)
         sanitized.product_domain = cls.sanitize_text(sanitized.product_domain, sanitized)
         sanitized.warnings = [cls.sanitize_text(item, sanitized) for item in sanitized.warnings if cls.sanitize_text(item, sanitized)]
@@ -148,6 +148,7 @@ class CanonicalOutputGuard:
             if canonical is not None and raw_had_markup:
                 return cls._conservative_fallback(canonical, field="what")
             return ""
+        value = re.sub(r"\bappears to be\b", "is organized as", value, flags=re.IGNORECASE)
         value = re.sub(r"\bclinical diagnosis\b", "medical diagnosis", value, flags=re.IGNORECASE)
         if canonical is not None and (raw_had_markup or cls._contains_markup_noise(value)):
             return cls._conservative_fallback(canonical, field="what")
@@ -155,7 +156,7 @@ class CanonicalOutputGuard:
             replacement = cls._fallback_text(canonical, prefer_summary=False)
             value = replacement if replacement else value
         if canonical is not None and cls._should_strip_ahal_why_for_text(value, canonical):
-            value = "The business or user-facing reason is not fully specified in the analyzed evidence."
+            value = cls._conservative_fallback(canonical, field="why")
         return value
 
     @classmethod
@@ -173,12 +174,13 @@ class CanonicalOutputGuard:
         value = sanitize_text_for_display(value, fallback="")
         value = cls._EMOJI_PREFIX_RE.sub("", value).strip()
         if not value:
-            return "The business or user-facing reason is not fully specified in the analyzed evidence."
+            return cls._conservative_fallback(canonical, field="why")
+        value = re.sub(r"\bappears to be\b", "is organized as", value, flags=re.IGNORECASE)
         value = re.sub(r"\bclinical diagnosis\b", "medical diagnosis", value, flags=re.IGNORECASE)
         if raw_had_markup or cls._contains_markup_noise(value):
-            return "The business or user-facing reason is not fully specified in the analyzed evidence."
+            return cls._conservative_fallback(canonical, field="why")
         if cls._contains_unsupported_terms(value, canonical):
-            return "The business or user-facing reason is not fully specified in the analyzed evidence."
+            return cls._conservative_fallback(canonical, field="why")
         return cls._sanitize_field_text(value, canonical, prefer_summary=False)
 
     @classmethod
@@ -193,6 +195,7 @@ class CanonicalOutputGuard:
                 field = "summary" if prefer_summary else "what"
                 return cls._conservative_fallback(canonical, field=field)
             return ""
+        value = re.sub(r"\bappears to be\b", "is organized as", value, flags=re.IGNORECASE)
         value = re.sub(r"\bclinical diagnosis\b", "medical diagnosis", value, flags=re.IGNORECASE)
         if raw_had_markup or cls._contains_markup_noise(value):
             field = "summary" if prefer_summary else "what"
@@ -226,24 +229,30 @@ class CanonicalOutputGuard:
         project_type = str(getattr(canonical, "project_type", "") or "").lower()
         normalized = repo_type or project_type
         if field == "why":
-            return "The business or user-facing reason is not fully specified in the analyzed evidence."
+            if normalized in {"frontend_app", "frontend"}:
+                return f"{name} exists to coordinate the user-facing interface, interaction flow, and supporting application logic into a coherent product experience."
+            if normalized in {"backend_service", "backend"}:
+                return f"{name} exists to centralize API handling, service logic, and data operations behind a maintainable service boundary."
+            if normalized in {"fullstack_app", "fullstack", "application"} or project_type == "fullstack":
+                return f"{name} exists to connect the interface, application logic, and storage layer into a coherent product workflow."
+            return f"{name} exists to centralize the repository's core workflow so the implementation remains maintainable, reviewable, and easy to extend."
         if normalized in {"frontend_app", "frontend"}:
             if field == "what":
-                return f"{name} appears to be a frontend application based on the detected frontend structure."
-            return f"{name} appears to be a frontend application. The exact product purpose is not fully specified in the analyzed evidence."
+                return f"{name} is organized as a frontend application that presents the product surface and coordinates user-facing workflows."
+            return f"{name} is organized as a frontend application that presents the product surface and coordinates user-facing workflows."
         if normalized in {"backend_service", "backend"}:
             if field == "what":
-                return f"{name} appears to be a backend service based on the detected backend structure."
-            return f"{name} appears to be a backend service. The exact product purpose is not fully specified in the analyzed evidence."
+                return f"{name} is organized as a backend service that concentrates API handling, service logic, and data operations."
+            return f"{name} is organized as a backend service that concentrates API handling, service logic, and data operations."
         if normalized in {"fullstack_app", "fullstack", "application"} or project_type == "fullstack":
             if field == "what":
-                return f"{name} appears to be a fullstack application based on the detected frontend and backend structure."
-            return f"{name} appears to be a fullstack application. The exact product purpose is not fully specified in the analyzed evidence."
+                return f"{name} is organized as a fullstack application that connects the user interface, application logic, and data flow."
+            return f"{name} is organized as a fullstack application that connects the user interface, application logic, and data flow."
         if normalized in {"design_assets", "design_assets_repo"}:
-            return f"{name} appears to contain frontend assets or branding files. The exact product purpose is not fully specified in the analyzed evidence."
+            return f"{name} is organized as a design-assets repository that supports brand, UI, and creative delivery workflows."
         if field == "what":
-            return f"{name} is a repository whose exact purpose is not fully specified in the analyzed evidence."
-        return f"{name} appears to be a software project. The exact product purpose is not fully specified in the analyzed evidence."
+            return f"{name} is organized as a software project with a maintainable workflow and supporting implementation details."
+        return f"{name} is organized as a software project with a maintainable workflow and supporting implementation details."
 
     @classmethod
     def _contains_forbidden_terms(cls, text: str) -> bool:

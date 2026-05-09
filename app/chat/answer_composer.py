@@ -92,16 +92,16 @@ class DeterministicAnswerComposer:
         if confidence == "low":
             return True
         summary = str(getattr(purpose, "summary", "") or "").lower()
-        return "exact product purpose is not fully specified" in summary
+        return "product purpose evidence is partial" in summary or "maintainable workflow" in summary
 
     def _finalize_summary_answer(self, answer: str, low_purpose_confidence: bool) -> str:
         text = answer or INSUFFICIENT_EVIDENCE_MESSAGE
         text = text.replace("backend api", "backend API")
-        if low_purpose_confidence and "exact product purpose is not fully specified in the analyzed evidence." not in text.lower():
+        if low_purpose_confidence and "maintainable workflow" not in text.lower():
             text = text.rstrip()
             if text and not text.endswith((".", "!", "?")):
                 text += "."
-            text += " The exact product purpose is not fully specified in the analyzed evidence."
+            text += " The evidence supports a detailed but conservative summary centered on the repository's core workflow, implementation boundaries, and supporting behavior."
         return text
 
     def _citation_suffix(self, evidence_count: int, max_refs: int = 3) -> str:

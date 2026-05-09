@@ -113,7 +113,7 @@ class PDFExporter:
         pb = getattr(prd_result, "project_brief", None)
         self._section(pdf, "Project Intelligence Brief")
         self._section(pdf, "Project Goal")
-        project_goal = CanonicalOutputGuard.sanitize_text(getattr(canonical, "product_summary", None) or self._brief_section(pb, "goal"), canonical)
+        project_goal = CanonicalOutputGuard.sanitize_text(getattr(canonical, "project_goal", None) or self._brief_section(pb, "goal"), canonical)
         self._paragraph(pdf, self._narrative_value(prd_result, polished_text, "project_goal", project_goal))
 
         self._section(pdf, "What")

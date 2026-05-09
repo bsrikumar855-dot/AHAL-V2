@@ -128,9 +128,9 @@ def safe_product_summary(project_name: str, domain: str, capabilities: list[str]
     if domain == "repository intelligence platform" and confidence == "high":
         sent = f"{name} is a repository intelligence application focused on codebase analysis, question answering, and documentation workflows."
     elif domain == "repository intelligence platform":
-        sent = f"{name} appears to be a repository intelligence application based on detected repository-analysis evidence."
+        sent = f"{name} is a repository intelligence application that coordinates codebase analysis, question answering, and documentation workflows."
     elif domain == "ai hallucination detection":
-        prefix = "is" if confidence == "high" else "appears to be"
+        prefix = "is" if confidence == "high" else "is organized as"
         sent = f"{name} {prefix} an AI hallucination detection and fact-checking backend that evaluates claims or AI-generated answers using web-sourced evidence."
     elif domain == "medical/healthcare assistance":
         if strong_medical_backend:
@@ -156,19 +156,19 @@ def safe_product_summary(project_name: str, domain: str, capabilities: list[str]
         sent = f"{name} is a DevOps or automation tool that supports workflow execution, deployment, or background processing."
     elif domain == "generic fullstack":
         stack_str = f" built with {stack}" if stack else ""
-        parts = [f"{name} appears to be a fullstack application{stack_str}."]
+        parts = [f"{name} is organized as a fullstack application{stack_str}."]
         if caps:
-            parts.append(f"It supports {caps}.")
+            parts.append(f"It coordinates {caps} across the interface, application logic, and supporting data flow.")
         else:
-            parts.append("The exact product workflow is not fully specified in the analyzed evidence.")
+            parts.append("It coordinates the repository's main workflow across the interface, application logic, and supporting data flow.")
         return clean_sentence(" ".join(_append_low_confidence(parts, confidence)))
     else: # generic backend
         stack_str = f" built with {stack}" if stack else ""
-        parts = [f"{name} appears to be a backend API service{stack_str}."]
+        parts = [f"{name} is organized as a backend API service{stack_str}."]
         if caps:
-            parts.append(f"It supports {caps}.")
+            parts.append(f"It concentrates {caps} within a maintainable service layer.")
         else:
-            parts.append("The exact product purpose is not fully specified in the analyzed evidence.")
+            parts.append("It concentrates the repository's main workflow within a maintainable service layer.")
         return clean_sentence(" ".join(_append_low_confidence(parts, confidence)))
 
     # 2. Append capabilities and stack if explicitly not generic
@@ -191,7 +191,7 @@ def safe_remaining_summary(remaining_items: list) -> str:
         return "No significant missing components were detected."
     
     joined = join_capabilities([t.lower() for t in titles])
-    return clean_sentence(f"Remaining work appears to include {joined}.")
+    return clean_sentence(f"Remaining work includes {joined}.")
 
 def safe_risk_summary(risks: list) -> str:
     """Condenses risks into a professional summary."""

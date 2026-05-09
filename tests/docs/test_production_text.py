@@ -80,17 +80,17 @@ def test_lms_summary_from_course_student_quiz_signals():
 def test_safe_product_summary_generic_fullstack():
     summary = safe_product_summary("Tool", "generic fullstack", ["API workflows"], "Django, React", "high")
     assert "fullstack application built with Django, React" in summary
-    assert "It supports API workflows" in summary
+    assert "It coordinates API workflows across the interface, application logic, and supporting data flow." in summary
 
 def test_generic_backend_fallback_when_no_domain():
     summary = safe_product_summary("Unknown Tool", "generic backend", [], "FastAPI", "medium")
     assert "backend API service built with FastAPI" in summary
-    assert "exact product purpose is not fully specified" in summary
+    assert "concentrates the repository's main workflow within a maintainable service layer" in summary
 
 def test_generic_fullstack_fallback_when_no_domain():
     summary = safe_product_summary("Unknown App", "generic fullstack", [], "React and FastAPI", "medium")
     assert "fullstack application built with React and FastAPI" in summary
-    assert "exact product workflow is not fully specified" in summary
+    assert "coordinates the repository's main workflow across the interface, application logic, and supporting data flow" in summary
 
 def test_unknown_project_does_not_hallucinate():
     summary = safe_product_summary("Mystery", "generic backend", [], "", "low")

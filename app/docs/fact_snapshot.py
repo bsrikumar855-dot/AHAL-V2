@@ -126,12 +126,13 @@ def build_fact_snapshot(scan_result=None, intelligence_result=None, prd_result=N
     domain = getattr(product_identity, "domain", None) if product_identity is not None else None
     domain_confidence = getattr(product_identity, "domain_confidence", "low") if product_identity is not None else "low"
     if product_identity is None and overview_section is not None:
-        if "exact product purpose is not fully specified" not in str(getattr(overview_section, "content", "") or "").lower():
+        overview_text = str(getattr(overview_section, "content", "") or "").lower()
+        if "product purpose evidence is partial" not in overview_text and "maintainable workflow" not in overview_text:
             domain_confidence = "medium"
     product_purpose_known = domain_confidence in {"medium", "high"} and domain not in {None, "", "unknown", "generic_backend", "generic_fullstack"}
     if project_type == "frontend" and domain == "unknown":
         product_purpose_known = False
-    if overview_section is not None and "exact product purpose is not fully specified" in str(getattr(overview_section, "content", "") or "").lower():
+    if overview_section is not None and any(token in str(getattr(overview_section, "content", "") or "").lower() for token in ("product purpose evidence is partial", "maintainable workflow")):
         product_purpose_known = False
 
     return PRDFactSnapshot(

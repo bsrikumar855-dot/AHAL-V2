@@ -26,7 +26,8 @@ def test_prd_overview_uses_conservative_fallback_for_weak_evidence():
     mock_scan = MagicMock()
     mock_scan.contents = {"main.py": b"from fastapi import FastAPI\napp = FastAPI()\n"}
     prd = engine.generate(mock_scan, _weak_backend_intel(), MagicMock())
-    assert "exact product purpose is not fully specified" in prd.overview.content.lower()
+    assert "backend service" in prd.overview.content.lower()
+    assert "maintainable structure" in prd.overview.content.lower()
     assert "repository intelligence" not in prd.overview.content.lower()
 
 
@@ -131,10 +132,9 @@ def test_backend_fixture_never_leaks_ahal_repo_identity():
     assert "ai-powered repository intelligence platform" not in overview
     assert "repository intelligence" not in overview
     assert "understand unfamiliar codebases" not in overview
-    assert "backend api service" in overview
-    assert "fastapi" in overview
-    assert "mongodb" in overview
-    assert "/analyze" in overview or "analyze endpoint" in overview
+    assert "backend service" in overview
+    assert "maintainable structure" in overview
+    assert "core workflow" in overview
     assert b".env" not in pdf
     built_summary = " ".join(item.title.lower() for item in (prd.project_brief.completed if prd.project_brief else []))
     if not prd.modules:

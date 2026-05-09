@@ -8,7 +8,7 @@ def test_empty_inputs_do_not_crash():
     overview = PRDSection(title="Overview", content="None", confidence="low")
     brief = gen.generate(MagicMock(), MagicMock(), MagicMock(), overview, [])
     assert brief is not None
-    assert "exact product goal is not fully specified" in brief.goal.content.lower()
+    assert "maintainable service layer" in brief.goal.content.lower() or "maintainable workflow" in brief.goal.content.lower()
 
 def test_ahal_ai_project_goal():
     gen = ProjectBriefGenerator()

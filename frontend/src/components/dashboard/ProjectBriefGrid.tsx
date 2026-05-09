@@ -6,6 +6,7 @@ import { GlassCard } from "../ui/GlassCard"
 
 export function ProjectBriefGrid({ intelligence }: { intelligence: IntelligenceData }) {
   const whatText = safeText(intelligence.what, "") || "What the project does is only partially specified in the available output."
+  const goalText = safeText(intelligence.projectGoal, "") || "Project goal was not provided in the returned intelligence."
   const repoType = String(intelligence.repoType || intelligence.projectType).toLowerCase()
   const isDocumentationRepo = ["documentation", "curriculum", "knowledge_base"].includes(repoType)
   const repoTypeLabel = repoType ? repoType.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase()) : "Unknown"
@@ -23,7 +24,7 @@ export function ProjectBriefGrid({ intelligence }: { intelligence: IntelligenceD
             <p className="mt-1 text-xs uppercase tracking-[0.2em] text-cyan-200/75">{repoTypeLabel}</p>
           </div>
         </div>
-        <p className="text-base leading-8 text-slate-200">{safeText(intelligence.projectSummary, "Project goal was not provided in the returned intelligence.")}</p>
+        <p className="text-base leading-8 text-slate-200">{goalText}</p>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
             <p className="text-sm text-slate-400">{isDocumentationRepo ? "Repository Structure Confidence" : "Architecture Confidence"}</p>

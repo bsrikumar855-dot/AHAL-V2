@@ -41,7 +41,7 @@ class MarkdownExporter:
         if getattr(prd_result, "project_brief", None):
             pb = prd_result.project_brief
             lines.append("## Project Intelligence Brief\n")
-            lines.append(f"### Project Goal\n{sanitize_text(CanonicalOutputGuard.sanitize_text(getattr(canonical, 'product_summary', pb.goal.content), canonical))}\n")
+            lines.append(f"### Project Goal\n{sanitize_text(CanonicalOutputGuard.sanitize_text(getattr(canonical, 'project_goal', pb.goal.content), canonical))}\n")
             lines.append(f"### What This Project Is\n{sanitize_text(CanonicalOutputGuard.sanitize_text(getattr(canonical, 'what', pb.what.content), canonical))}\n")
             lines.append(f"### Why This Project Exists\n{sanitize_text(CanonicalOutputGuard.sanitize_text(getattr(canonical, 'why', pb.why.content), canonical))}\n")
             

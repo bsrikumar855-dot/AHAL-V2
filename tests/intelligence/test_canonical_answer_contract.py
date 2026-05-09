@@ -56,6 +56,19 @@ def test_curriculum_derivation_is_not_backend_api_layer():
     )
 
 
+def test_department_portal_uses_repo_title_in_what_and_why():
+    project_name = "SIET Inceptron — CSE Department Portal"
+
+    assert (
+        derive_project_what(project_name, "", "fullstack_app")
+        == "SIET Inceptron — CSE Department Portal is a professional academic coordination portal for notices, coordination, and operations."
+    )
+    assert (
+        derive_project_why(project_name, "", "fullstack_app")
+        == "It exists to centralize academic notices, coordination, and operational information in one shared portal."
+    )
+
+
 def test_guard_blocks_finance_when_not_supported():
     canonical = CanonicalProjectIntelligence(
         session_id="s1",
@@ -72,7 +85,9 @@ def test_guard_blocks_finance_when_not_supported():
 
     sanitized = CanonicalOutputGuard.sanitize_canonical(canonical)
 
-    assert sanitized.why == "The business or user-facing reason is not fully specified in the analyzed evidence."
+    assert sanitized.why == (
+        "Sound Files For Notifications exists to coordinate the user-facing interface, interaction flow, and supporting application logic into a coherent product experience."
+    )
 
 
 def test_canonical_output_guard_replaces_html_logo_markup():
@@ -93,12 +108,13 @@ def test_canonical_output_guard_replaces_html_logo_markup():
     rendered = " ".join([sanitized.product_summary, sanitized.project_goal, sanitized.what, sanitized.why]).lower()
 
     assert sanitized.product_summary == (
-        "Create And Activate Virtual Environment appears to be a fullstack application. "
-        "The exact product purpose is not fully specified in the analyzed evidence."
+        "Create And Activate Virtual Environment is organized as a fullstack application that connects the user interface, application logic, and data flow."
     )
     assert sanitized.what == (
-        "Create And Activate Virtual Environment appears to be a fullstack application based on the detected frontend and backend structure."
+        "Create And Activate Virtual Environment is organized as a fullstack application that connects the user interface, application logic, and data flow."
     )
-    assert sanitized.why == "The business or user-facing reason is not fully specified in the analyzed evidence."
+    assert sanitized.why == (
+        "Create And Activate Virtual Environment exists to connect the interface, application logic, and storage layer into a coherent product workflow."
+    )
     for token in ("<", ">", "img", "src=", "alt=", "width=", ".png"):
         assert token not in rendered

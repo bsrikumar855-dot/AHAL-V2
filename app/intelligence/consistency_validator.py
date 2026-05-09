@@ -179,7 +179,7 @@ class OutputConsistencyValidator:
         stack_text = f" built with {' and '.join(stack_tokens[:2])}" if stack_tokens else ""
         route_text = f" It exposes {route} endpoint." if route else ""
         if architecture == "frontend":
-            return f"This project appears to be a frontend application{stack_text}. The exact product purpose is not fully specified in the analyzed evidence."
+            return f"This project is organized as a frontend application{stack_text}. It coordinates the user-facing experience, interaction flow, and related application behavior into a coherent product surface."
         if architecture == "fullstack":
-            return f"This project appears to be a fullstack application{stack_text}.{route_text} The exact product purpose is not fully specified in the analyzed evidence."
-        return f"This project appears to be a backend API service{stack_text}.{route_text} The exact product purpose is not fully specified in the analyzed evidence."
+            return f"This project is organized as a fullstack application{stack_text}.{route_text} It connects the interface, application logic, and data flow into a coherent product workflow."
+        return f"This project is organized as a backend API service{stack_text}.{route_text} It centralizes API handling, service logic, and data operations behind a maintainable service boundary."

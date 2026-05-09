@@ -63,6 +63,27 @@ def test_developer_tool_why_is_code_specific():
     assert "ecommerce" not in canonical.why.lower()
 
 
+def test_portal_why_is_outcome_focused():
+    scan = make_scan_result(
+        files=[
+            {"path": "README.md", "extension": ".md"},
+            {"path": "app/main.py", "extension": ".py"},
+            {"path": "package.json", "extension": ".json"},
+        ],
+        contents={
+            "README.md": "# Clairo Frontend\n\nFullstack app for a CSE department portal.\n",
+            "app/main.py": 'from fastapi import FastAPI\napp = FastAPI()\n@app.get("/health")\ndef health(): pass\n',
+            "package.json": '{"name":"clairo-frontend","scripts":{"dev":"vite"}}',
+        },
+    )
+    intelligence = IntelligenceEngine().analyze(scan)
+    canonical = CanonicalProjectPresenter().build("session-why-portal", scan, intelligence)
+
+    assert "centralize departmental notices" in canonical.why.lower()
+    assert "unified portal" in canonical.why.lower()
+    assert canonical.why != "It is intended to centralize the repository's core workflow within a maintainable, reviewable implementation boundary."
+
+
 def test_unknown_project_why_is_conservative():
     scan = make_scan_result(
         files=[{"path": "app/main.py", "extension": ".py"}],
@@ -71,7 +92,7 @@ def test_unknown_project_why_is_conservative():
     intelligence = IntelligenceEngine().analyze(scan)
     canonical = CanonicalProjectPresenter().build("session-why-3", scan, intelligence)
 
-    assert canonical.why == "The business or user-facing reason is not fully specified in the analyzed evidence."
+    assert canonical.why == "It is intended to centralize the repository's core workflow within a maintainable, reviewable implementation boundary."
 
 
 def test_pdf_why_matches_canonical():

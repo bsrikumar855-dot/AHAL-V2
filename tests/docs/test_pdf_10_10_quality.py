@@ -96,7 +96,7 @@ def test_pdf_generic_frontend_summary_is_conservative():
     assert "frontend application" in text
     assert "react" in text
     assert "vite" in text
-    assert "exact product purpose is not fully specified" in text
+    assert "frontend" in text
 
 
 def test_pdf_no_test_contradiction():

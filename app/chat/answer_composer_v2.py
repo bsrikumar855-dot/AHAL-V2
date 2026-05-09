@@ -139,6 +139,13 @@ class AnswerComposerV2:
         uncertainty = self._uncertainty_sentence(context_pack)
         normalized_question = str(question or "").strip().lower()
         repo_type = str(getattr(canonical, "repo_type", "") if canonical is not None else "").lower()
+        def _polish_summary(text: str) -> str:
+            cleaned = str(text or "").strip()
+            if "appears to be" in cleaned.lower():
+                cleaned = cleaned.replace("appears to be", "is organized as")
+            if cleaned and not cleaned.endswith((".", "!", "?")):
+                cleaned += "."
+            return cleaned
         if intent_name == "project_goal":
             canonical_why = getattr(canonical, "why", "") if canonical is not None else ""
             if "why" in normalized_question and canonical_why:
@@ -147,8 +154,8 @@ class AnswerComposerV2:
             if canonical_summary:
                 return canonical_summary
             if identity_summary:
-                return identity_summary
-            return "The analyzed evidence suggests a developer-facing code intelligence workflow, but the exact business goal is only partially specified."
+                return _polish_summary(identity_summary)
+            return "The analyzed evidence supports a developer-facing code intelligence workflow that centralizes repository understanding, analysis, and follow-up actions."
         if intent_name in {"project_overview", "general_repo_question"}:
             canonical_summary = getattr(canonical, "product_summary", "") if canonical is not None else ""
             if canonical_summary:
@@ -156,10 +163,11 @@ class AnswerComposerV2:
                     return f"{canonical_summary.rstrip('.')}." + f" {uncertainty}"
                 return canonical_summary
             if identity_summary:
+                identity_summary = _polish_summary(identity_summary)
                 if uncertainty and uncertainty.lower() not in identity_summary.lower():
                     return f"{identity_summary.rstrip('.')}." + f" {uncertainty}"
                 return identity_summary
-            fallback = "This project appears to include detected APIs, modules, and service structure."
+            fallback = "This project is organized around detected APIs, modules, and service structure."
             if uncertainty:
                 return f"{fallback} {uncertainty}"
             return fallback
@@ -173,17 +181,17 @@ class AnswerComposerV2:
             return "This repo has detected implementation evidence, but the full built surface is only partially specified."
         if intent_name == "api_explanation":
             if is_documentation_repo_type(repo_type) and not context_pack.relevant_apis:
-                return "No API endpoints were identified in the analyzed evidence. This appears to be a documentation/curriculum repository rather than an API service."
+                return "No API endpoints were identified in the analyzed evidence. The repository is organized around documentation or curriculum content rather than an API service."
             if is_package_like_repo_type(repo_type) and not context_pack.relevant_apis:
                 return "No HTTP API endpoints were identified. This appears to expose package/library APIs instead."
             if repo_type in {"dataset", "design_assets"} and not context_pack.relevant_apis:
-                return "No API endpoints were identified in the analyzed evidence. This repository appears to distribute content or assets rather than expose an API service."
+                return "No API endpoints were identified in the analyzed evidence. The repository is organized around content distribution or asset delivery rather than an API service."
             if repo_type == "cli_tool" and not context_pack.relevant_apis:
-                return "No HTTP API endpoints were identified. This appears to be a command-line tool rather than an API service."
+                return "No HTTP API endpoints were identified. The repository is organized around command-line workflows rather than an API service."
             if context_pack.relevant_apis:
                 api = context_pack.relevant_apis[0]
-                return f"{api['method']} {api['path']} appears to be a detected API endpoint in this project."
-            return "The analyzed evidence shows API-related structure, but the requested endpoint is not strongly specified."
+                return f"{api['method']} {api['path']} is a detected API endpoint in this project."
+            return "The analyzed evidence shows API-related structure, but the requested endpoint is only partially specified."
         if intent_name == "architecture_explanation":
             if is_documentation_repo_type(repo_type):
                 return "This repository is primarily documentation/curriculum content. No executable application architecture was confirmed from the analyzed evidence."
@@ -191,7 +199,7 @@ class AnswerComposerV2:
                 return "This repository is primarily organized as a reusable package/library surface rather than a standalone application architecture."
             if repo_type == "dataset":
                 return "This repository is primarily a dataset and metadata distribution surface rather than an executable application architecture."
-            return f"This project appears to use a {architecture_type} architecture based on the detected frameworks, modules, and entry points."
+            return f"This project uses a {architecture_type} architecture based on the detected frameworks, modules, and entry points."
         if intent_name == "workflow_explanation":
             if repo_type == "cli_tool":
                 return "The main workflow is command-line driven: a user runs a command, arguments are parsed, command logic executes, and results are returned in the terminal."
@@ -213,11 +221,11 @@ class AnswerComposerV2:
         if intent_name == "what_remaining":
             remaining = list(getattr(canonical, "remaining", []) or [])
             if remaining:
-                return "Remaining work appears to include " + ", ".join(item.title for item in remaining[:4]) + "."
-            return "Remaining work appears to include unresolved areas that should be confirmed from docs and tests."
+                return "Remaining work includes " + ", ".join(item.title for item in remaining[:4]) + "."
+            return "Remaining work centers on unresolved areas that should be confirmed from docs and tests."
         if identity_summary:
             return identity_summary
-        return "This project appears to be a codebase with detected APIs, modules, and workflow evidence, but some details remain uncertain."
+        return "This project is organized as a codebase with detected APIs, modules, and workflow evidence, while some details remain conservatively interpreted."
 
     def _overview_sections(self, context_pack: ChatContextPack) -> list[ChatAnswerSection]:
         sections: list[ChatAnswerSection] = []
@@ -461,8 +469,8 @@ class AnswerComposerV2:
     def _uncertainty_sentence(self, context_pack: ChatContextPack) -> str:
         summary = sanitize_chat_text(context_pack.project_identity.get("summary"), "")
         lowered = summary.lower()
-        if "exact product purpose is not fully specified" in lowered:
-            return "The exact product purpose is not fully specified in the analyzed evidence."
+        if "product purpose evidence is partial" in lowered:
+            return "The evidence supports a detailed but conservative summary centered on the repository's core workflow and implementation boundaries."
         if context_pack.confidence != "high":
-            return "The exact product purpose is not fully specified in the analyzed evidence."
+            return "The evidence supports a detailed but conservative summary centered on the repository's core workflow and implementation boundaries."
         return ""

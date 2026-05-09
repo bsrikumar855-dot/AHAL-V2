@@ -482,7 +482,7 @@ class OnboardingGenerator:
         if overview:
             return clean_sentence(f"{overview} Detected architecture: {architecture or project_type or 'unknown'}. Key startup files: {', '.join(self._strip_detail(item) for item in entry_points[:2]) or 'limited evidence'}. Important APIs: {', '.join(api_routes[:2]) or 'limited evidence'}.")
         parts = [
-            f"The codebase appears to be a {architecture or project_type or 'software'} project.",
+            f"The codebase is organized as a {architecture or project_type or 'software'} project.",
         ]
         if stack:
             parts.append(f"Detected stack: {stack}.")

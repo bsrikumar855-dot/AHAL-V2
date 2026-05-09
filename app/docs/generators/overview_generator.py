@@ -146,7 +146,6 @@ class OverviewGenerator:
             last_sep = stack_text.rfind(", ")
             stack_text = f"{stack_text[:last_sep]}, and {stack_text[last_sep + 2:]}"
         return (
-            "The exact product purpose is not fully specified in the analyzed evidence. "
-            f"Technically, this appears to be a backend or fullstack service built with {stack_text}. "
-            f"Detected implementation signals include {', '.join(capability_tokens)} APIs."
+            f"The repository is organized as a backend or fullstack service built with {stack_text}. "
+            f"It supports {', '.join(capability_tokens)} workflows through the detected API surface and supporting implementation layers."
         )

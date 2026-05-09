@@ -73,7 +73,7 @@ def test_duplicate_paragraphs_removed():
 
     answer = composer.compose("What does this project do?", intent, context_pack, llm_result=llm_result)
 
-    assert answer.answer.count("This project appears to be a backend API service.") == 1
+    assert answer.answer.count("This project is organized as a backend API service.") == 1
     assert len(answer.sections) == 1
     assert answer.sections[0].bullets == ["POST /predict"]
 
@@ -86,8 +86,8 @@ def test_project_overview_answer_is_not_repeated_and_uncertainty_preserved():
     answer = composer.compose("What does this project do?", intent, context_pack)
     lowered = answer.answer.lower()
 
-    assert lowered.count("youtube distraction appears to be a backend api service built with python and flask. it exposes a /predict endpoint.") == 1
-    assert "the exact product purpose is not fully specified in the analyzed evidence." in lowered
+    assert lowered.count("youtube distraction is organized as a backend api service built with python and flask. it exposes a /predict endpoint.") == 1
+    assert "detailed but conservative summary centered on the repository's core workflow" in lowered
     assert [section.title for section in answer.sections] == ["What it is", "Detected architecture", "Key API", "What is uncertain"]
 
 

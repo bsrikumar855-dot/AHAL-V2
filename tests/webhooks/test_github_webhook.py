@@ -95,12 +95,13 @@ def test_push_event_with_index_triggers_delta_scan(client, monkeypatch):
     sid, index = _repo_index()
     payload = {
         "ref": "refs/heads/main",
-        "repository": {"html_url": index.repo_url},
+        "repository": {"html_url": index.repo_url, "private": True},
         "commits": [{"added": ["app/new.py"], "modified": ["app/api/routes.py"], "removed": []}],
     }
     response = client.post("/webhooks/github", headers={"X-GitHub-Event": "push"}, json=payload)
     assert response.status_code == 200
     assert response.json()["triggered"]["delta_scan"] is True
+    assert client.get(f"/analyze/status/{sid}").json()["repo_visibility"] == "private"
     timeline = client.get(f"/analyze/timeline/{sid}").json()
     stages = [event["stage"] for event in timeline["events"]]
     assert "webhook_delta_scan_started" in stages

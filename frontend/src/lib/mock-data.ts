@@ -16,8 +16,12 @@ export const demoIntelligence: IntelligenceData = {
   sessionId: demoSessionId,
   projectName: "AHAL AI Demo Workspace",
   projectType: "fullstack",
+  repoVisibility: "Public",
+  hallucinationRisk: "Low",
   architectureConfidence: "High",
   productPurposeConfidence: "High",
+  projectGoal:
+    "This demo workspace is designed to show how a repository intelligence product turns code analysis into clear, evidence-backed guidance. It combines chat, reporting, onboarding, and engineering insight workflows in a single frontend and backend experience.",
   projectSummary:
     "This demo workspace shows a repository intelligence product with analysis workflows, validated summaries, chat, reporting, and engineering insight generation across backend APIs and a premium frontend experience.",
   what:

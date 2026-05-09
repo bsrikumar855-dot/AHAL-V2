@@ -206,6 +206,52 @@ function normalizeProductSummary(raw: IntelligenceResponse, explicitDescription:
   return fallback
 }
 
+function normalizeProjectGoal(raw: IntelligenceResponse, explicitDescription: string): string {
+  const canonical = raw.canonical_intelligence
+  if (canonical?.project_goal) {
+    return applyCanonicalDeveloperGuard(displayText(canonical.project_goal, "Project goal is not fully specified in the analyzed evidence."), canonical)
+  }
+  if (raw.project_goal) {
+    return displayText(raw.project_goal, "Project goal is not fully specified in the analyzed evidence.")
+  }
+  const fallback = displayText(raw.summary?.what ?? raw.project_goal, "Project goal is not fully specified in the analyzed evidence.")
+  if (explicitDescription && fallback === explicitDescription) {
+    return applyCanonicalDeveloperGuard(fallback, canonical)
+  }
+  return fallback
+}
+
+function normalizeRepoVisibility(raw: IntelligenceResponse): "Public" | "Private" | "Unknown" {
+  const canonical = toText(raw.canonical_intelligence?.repo_visibility ?? raw.repo_visibility)
+    .trim()
+    .toLowerCase()
+
+  if (canonical.includes("public")) {
+    return "Public"
+  }
+  if (canonical.includes("private")) {
+    return "Private"
+  }
+  return "Unknown"
+}
+
+function normalizeHallucinationRisk(raw: IntelligenceResponse): "High" | "Medium" | "Low" | "Unknown" {
+  const canonical = toText(raw.canonical_intelligence?.hallucination_risk ?? raw.hallucination_risk)
+    .trim()
+    .toLowerCase()
+
+  if (canonical.includes("high")) {
+    return "High"
+  }
+  if (canonical.includes("medium")) {
+    return "Medium"
+  }
+  if (canonical.includes("low")) {
+    return "Low"
+  }
+  return "Unknown"
+}
+
 function normalizeWhat(raw: IntelligenceResponse, explicitDescription: string): string {
   const canonical = raw.canonical_intelligence
   if (canonical?.what) {
@@ -772,9 +818,12 @@ export function normalizeIntelligence(raw: unknown): NormalizedIntelligence {
   const normalizedBase: Omit<NormalizedIntelligence, "dataQuality"> = {
     sessionId: toText(intelligence.canonical_intelligence?.session_id ?? intelligence.session_id),
     projectName: displayText(intelligence.canonical_intelligence?.project_name ?? intelligence.project_name, "Analyzed Project"),
+    projectGoal: normalizeProjectGoal(intelligence, explicitDescription),
     projectSummary: normalizeProductSummary(intelligence, explicitDescription),
     projectType,
     repoType: toText(intelligence.canonical_intelligence?.repo_type),
+    repoVisibility: normalizeRepoVisibility(intelligence),
+    hallucinationRisk: normalizeHallucinationRisk(intelligence),
     architectureConfidence: normalizeConfidence(intelligence.canonical_intelligence?.confidence?.architecture ?? intelligence.architecture_confidence ?? intelligence.confidence),
     productPurposeConfidence: normalizeConfidence(intelligence.canonical_intelligence?.confidence?.product_purpose ?? (explicitDescription ? "High" : intelligence.product_purpose_confidence ?? intelligence.confidence)),
     what: normalizeWhat(intelligence, explicitDescription),

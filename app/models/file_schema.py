@@ -103,4 +103,5 @@ class SessionInfo(BaseModel):
     created_at: str = ""
     updated_at: str = ""
     confidence: str = "low"
+    repo_visibility: str = "unknown"
     warnings: List[str] = Field(default_factory=list)

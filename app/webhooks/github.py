@@ -99,9 +99,13 @@ def _handle_push(payload: dict) -> WebhookProcessResult:
     warnings = []
     triggered = WebhookTriggeredResult(delta_scan=False, pr_analysis=False)
     branch = str(payload.get("ref", "") or "").split("/")[-1] or None
+    visibility = _repo_visibility(payload)
     if index is None:
         warnings.append("No repo index found for webhook repository.")
         return _record_and_return("push", payload, warnings=warnings, branch=branch)
+
+    if visibility != "unknown":
+        session_manager.set_session_metadata(index.last_scan_session_id, repo_visibility=visibility)
 
     changed_files = _push_changed_files(payload)
     session_manager.append_timeline_event(index.last_scan_session_id, "github_webhook_received", "completed", "GitHub push webhook received")
@@ -128,6 +132,7 @@ def _handle_pull_request(payload: dict) -> WebhookProcessResult:
     diff_text = str(pr.get("diff_text") or payload.get("diff_text") or "")
     branch = str(((pr.get("head") or {}).get("ref")) or "")
     pr_number = pr.get("number") or payload.get("number")
+    visibility = _repo_visibility(payload)
     if not changed_files and not diff_text:
         warnings.append("Insufficient PR diff data was provided in the webhook payload.")
         return _record_and_return("pull_request", payload, warnings=warnings, branch=branch or None, pr_number=pr_number)
@@ -141,6 +146,8 @@ def _handle_pull_request(payload: dict) -> WebhookProcessResult:
         info = session_manager.get_info(session_id)
         scan_result = session_manager.get_result(session_id)
         if info is not None and scan_result is not None:
+            if visibility != "unknown":
+                session_manager.set_session_metadata(session_id, repo_visibility=visibility)
             from app.intelligence.intelligence_engine import IntelligenceEngine
             from app.graph.graph_engine import KnowledgeGraphEngine
 
@@ -201,6 +208,13 @@ def _record_event(event_type: str, repo_url: str | None, action, branch: str | N
 def _repo_url(payload: dict) -> str | None:
     repo = payload.get("repository") or {}
     return repo.get("html_url") or repo.get("clone_url")
+
+
+def _repo_visibility(payload: dict) -> str:
+    repo = payload.get("repository") or {}
+    if "private" not in repo:
+        return "unknown"
+    return "private" if bool(repo.get("private")) else "public"
 
 
 def _push_changed_files(payload: dict) -> list[DeltaChangedFile]:

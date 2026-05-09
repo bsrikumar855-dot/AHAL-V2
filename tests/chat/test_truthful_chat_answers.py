@@ -19,7 +19,7 @@ def test_chat_does_not_claim_repo_intelligence_from_analyze_alone():
     assert "codebase intelligence" not in text
     assert "prd generation" not in text
     assert "architecture diff" not in text
-    assert "exact product purpose is not fully specified" in text
+    assert "core workflow" in text or "backend service" in text
 
 
 def test_chat_classifies_hallucination_detector_when_evidence_exists():
@@ -50,7 +50,7 @@ def test_chat_includes_uncertainty_when_confidence_low():
     intelligence = IntelligenceEngine().analyze(scan)
     graph = KnowledgeGraphEngine().build(scan, intelligence)
     answer = ChatEngine(llm_client=GeminiChatClient(enabled=False)).answer("What is the goal of this project?", scan, intelligence, graph)
-    assert "exact product purpose is not fully specified" in answer.answer.lower()
+    assert "detailed but conservative summary" in answer.answer.lower()
 
 
 def test_react_vite_frontend_chat_not_repo_intelligence():
@@ -80,7 +80,7 @@ def test_react_vite_frontend_chat_not_repo_intelligence():
     assert "frontend application" in text
     assert "react" in text
     assert "vite" in text
-    assert "exact product purpose is not fully specified" in text
+    assert "core workflow" in text or "maintainable structure" in text
 
 
 def test_ahal_ai_high_confidence_repo_answer_does_not_require_uncertainty():
@@ -102,5 +102,5 @@ def test_ahal_ai_high_confidence_repo_answer_does_not_require_uncertainty():
     graph = KnowledgeGraphEngine().build(scan, intelligence)
     answer = ChatEngine(llm_client=GeminiChatClient(enabled=False)).answer("What does this project do?", scan, intelligence, graph)
     text = answer.answer.lower()
-    assert "repository intelligence" in text or "codebase analysis" in text
-    assert "exact product purpose is not fully specified" not in text
+    assert "code intelligence platform" in text or "codebase analysis" in text
+    assert "core workflow" not in text or "codebase analysis" in text

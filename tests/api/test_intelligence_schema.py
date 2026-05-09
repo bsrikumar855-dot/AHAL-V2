@@ -18,6 +18,9 @@ def test_folder_intelligence_schema(client):
     assert data["session_type"] == "folder"
     assert "summary" in data
     assert "technical" in data
+    assert data["repo_visibility"] == "unknown"
+    assert data["hallucination_risk"] in {"medium", "high"}
+    assert any("Hallucination guard" in warning for warning in data["warnings"])
 
 
 def test_repo_intelligence_schema(client):
@@ -29,7 +32,19 @@ def test_repo_intelligence_schema(client):
 
     response = client.get(f"/analyze/intelligence/{sid}")
     assert response.status_code == 200
-    assert response.json()["session_type"] == "repo"
+    data = response.json()
+    assert data["session_type"] == "repo"
+    assert data["repo_visibility"] == "unknown"
+
+
+def test_intelligence_schema_flags_hallucination_risk_when_evidence_is_sparse(client):
+    sid = session_manager.create_session(session_type="folder", source_name="empty.zip")
+    scan = empty_scan_result()
+    scan.session_id = sid
+    session_manager.set_result(sid, scan)
+    data = client.get(f"/analyze/intelligence/{sid}").json()
+    assert data["hallucination_risk"] == "high"
+    assert any("Hallucination guard" in warning for warning in data["warnings"])
 
 
 def test_code_intelligence_schema(client):
@@ -85,3 +100,24 @@ def test_schema_empty_fields_safe(client):
     data = client.get(f"/analyze/intelligence/{sid}").json()
     assert data["project_goal"]
     assert isinstance(data["key_modules"], list)
+
+
+def test_schema_falls_back_when_prd_generation_fails(client, monkeypatch):
+    sid = session_manager.create_session(session_type="folder", source_name="project.zip")
+    scan = python_fastapi_scan()
+    scan.session_id = sid
+    session_manager.set_result(sid, scan)
+
+    def explode(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("app.api.intelligence_schema.PRDEngine.generate", explode)
+
+    response = client.get(f"/analyze/intelligence/{sid}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["schema_version"] == 2
+    assert data["project_goal"]
+    assert data["summary"]["what"]
+    assert data["summary"]["why"]
+    assert "service boundary" in data["summary"]["why"].lower() or "centralize" in data["summary"]["why"].lower()

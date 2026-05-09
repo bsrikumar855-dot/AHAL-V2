@@ -48,7 +48,7 @@ class _SessionEntry:
         "session_id", "access_token", "status", "stage",
         "progress", "processed_files", "total_files",
         "result", "created_at", "message", "session_type",
-        "source_name", "updated_at", "confidence", "warnings",
+        "source_name", "updated_at", "confidence", "repo_visibility", "warnings",
         "timeline", "artifacts",
     )
 
@@ -67,6 +67,7 @@ class _SessionEntry:
         self.source_name = source_name
         self.updated_at = utc_now_iso()
         self.confidence = "low"
+        self.repo_visibility = "unknown"
         self.warnings = []
         self.timeline = [
             SessionTimelineEvent(
@@ -370,6 +371,7 @@ class SessionManager:
                 created_at=entry.timeline[0].timestamp if entry.timeline else "",
                 updated_at=entry.updated_at,
                 confidence=entry.confidence,
+                repo_visibility=entry.repo_visibility,
                 warnings=list(entry.warnings),
             )
 
@@ -500,6 +502,7 @@ class SessionManager:
             "created_at": entry.timeline[0].timestamp if entry.timeline else "",
             "updated_at": entry.updated_at,
             "confidence": entry.confidence,
+            "repo_visibility": entry.repo_visibility,
             "warnings": list(entry.warnings),
             "timeline": [item.model_dump() for item in entry.timeline],
         }

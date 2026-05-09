@@ -53,6 +53,8 @@ export interface IntelligenceResponse {
   project_name?: string
   project_goal?: string
   project_type?: string
+  repo_visibility?: string
+  hallucination_risk?: string
   architecture_style?: string
   architecture_confidence?: string
   product_purpose_confidence?: string
@@ -82,6 +84,8 @@ export interface CanonicalIntelligenceResponse {
   project_name?: string
   project_type?: string
   repo_type?: string
+  repo_visibility?: string
+  hallucination_risk?: string
   product_summary?: string
   project_goal?: string
   product_domain?: string
@@ -266,8 +270,11 @@ export interface NormalizedIntelligence {
   projectName: string
   projectType: ProjectType
   repoType?: string
+  repoVisibility: "Public" | "Private" | "Unknown"
+  hallucinationRisk: "High" | "Medium" | "Low" | "Unknown"
   architectureConfidence: ConfidenceLevel | "Unknown"
   productPurposeConfidence: ConfidenceLevel | "Unknown"
+  projectGoal: string
   projectSummary: string
   what: string
   why: string

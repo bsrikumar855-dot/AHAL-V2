@@ -86,7 +86,7 @@ def test_dashboard_payload_has_canonical_intelligence(client):
     assert "canonical_intelligence" in data
     assert data["canonical_intelligence"]["product_summary"]
     assert data["summary"]["what"] == data["canonical_intelligence"]["what"]
-    assert data["project_goal"] == data["canonical_intelligence"]["product_summary"]
+    assert data["project_goal"] == data["canonical_intelligence"]["project_goal"]
 
 
 def test_intelligence_api_summary_what_matches_canonical(client):
