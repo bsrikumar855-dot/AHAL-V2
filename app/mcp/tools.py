@@ -5,7 +5,8 @@ from typing import Any, Callable
 
 from app.api.intelligence_schema import build_intelligence_schema
 from app.chat.chat_engine import ChatEngine
-from app.chat.models import ChatAnswer, EvidenceReference
+from app.chat.code_answering import build_code_chat_answer
+from app.chat.models import ChatAnswer
 from app.code import CodeAnalyzer
 from app.config import config
 from app.docs.exporters.markdown_exporter import MarkdownExporter
@@ -352,42 +353,7 @@ class MCPToolRegistry:
         return info, result, intelligence, graph, prd
 
     def _code_chat_answer(self, question: str, code_result) -> ChatAnswer:
-        q_lower = question.lower()
-        if "function" in q_lower and getattr(code_result, "detected_functions", []):
-            answer = (
-                f"The snippet defines these functions: {', '.join(code_result.detected_functions[:6])}. "
-                f"{code_result.summary} See evidence [E1]."
-            )
-        elif "class" in q_lower and getattr(code_result, "detected_classes", []):
-            answer = f"The snippet defines these classes or types: {', '.join(code_result.detected_classes[:6])}. See evidence [E1]."
-        elif "issue" in q_lower or "production" in q_lower:
-            issues = getattr(code_result, "issues", [])
-            answer = (
-                f"{'; '.join(issues[:4])} See evidence [E1]."
-                if issues
-                else "No confirmed production blockers were proven from the snippet alone, but more testing and operational review would still be needed. See evidence [E1]."
-            )
-        elif "improve" in q_lower:
-            improvements = getattr(code_result, "suggested_improvements", [])
-            answer = f"Suggested improvements: {'; '.join(improvements[:4]) if improvements else 'Add tests, stronger error handling, and clearer structure where appropriate.'} See evidence [E1]."
-        else:
-            answer = f"{code_result.summary} See evidence [E1]."
-        return ChatAnswer(
-            answer=answer,
-            confidence=getattr(code_result, "confidence", "medium"),
-            evidence=[
-                EvidenceReference(
-                    source_type="file",
-                    source_id=getattr(getattr(code_result, "evidence", [None])[0], "source_id", "snippet"),
-                    file=None,
-                    reason=getattr(getattr(code_result, "evidence", [None])[0], "reason", "Analyzed the submitted code snippet directly."),
-                    snippet=None,
-                    confidence=getattr(code_result, "confidence", "medium"),
-                )
-            ],
-            warnings=list(getattr(code_result, "warnings", [])),
-            insufficient_context=False,
-        )
+        return build_code_chat_answer(question, code_result)
 
     def _error(self, code: str, message: str) -> dict[str, Any]:
         return {"ok": False, "error_code": code, "message": message}

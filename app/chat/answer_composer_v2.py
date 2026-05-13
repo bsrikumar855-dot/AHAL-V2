@@ -61,7 +61,7 @@ class AnswerComposerV2:
             if intent_name == "general_repo_question":
                 followup_intent = "project_overview"
 
-        answer_parts = [direct_answer]
+        answer_parts = [f"In short: {direct_answer}"]
         for section in sections:
             block = [section.title]
             if section.content:
@@ -181,7 +181,7 @@ class AnswerComposerV2:
             return "This repo has detected implementation evidence, but the full built surface is only partially specified."
         if intent_name == "api_explanation":
             if is_documentation_repo_type(repo_type) and not context_pack.relevant_apis:
-                return "No API endpoints were identified in the analyzed evidence. The repository is organized around documentation or curriculum content rather than an API service."
+                return "No API endpoints were identified in the analyzed evidence. This is a documentation/curriculum repository rather than an API service."
             if is_package_like_repo_type(repo_type) and not context_pack.relevant_apis:
                 return "No HTTP API endpoints were identified. This appears to expose package/library APIs instead."
             if repo_type in {"dataset", "design_assets"} and not context_pack.relevant_apis:

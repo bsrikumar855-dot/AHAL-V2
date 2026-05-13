@@ -102,6 +102,7 @@ def is_strong_identity_phrase(text: str) -> bool:
         "research assistant",
         "whatsapp gateway",
         "study plan",
+        "media player",
     )
-    strong_nouns = ("backend", "frontend", "fullstack", "application", "platform", "system", "service", "tool", "gateway", "assistant", "engine")
+    strong_nouns = ("backend", "frontend", "fullstack", "application", "app", "platform", "system", "service", "tool", "gateway", "assistant", "engine", "portal", "player")
     return any(term in value for term in strong_terms) or any(noun in words for noun in strong_nouns)

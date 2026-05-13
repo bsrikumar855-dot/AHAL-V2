@@ -69,6 +69,18 @@ def test_department_portal_uses_repo_title_in_what_and_why():
     )
 
 
+def test_media_player_what_is_product_surface_not_goal():
+    project_name = "AI Gesture Controlled Media Player"
+    description = "An interactive media player built using computer vision that allows users to control videos and music using hand gestures and facial expressions in real-time."
+
+    what = derive_project_what(project_name, description, "backend_service")
+    why = derive_project_why(project_name, description, "backend_service")
+
+    assert "computer-vision media player interface" in what.lower()
+    assert "playback control" in what.lower()
+    assert what != why
+
+
 def test_guard_blocks_finance_when_not_supported():
     canonical = CanonicalProjectIntelligence(
         session_id="s1",

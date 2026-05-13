@@ -72,6 +72,8 @@ def test_code_chat_works(client):
     data = answer.json()
     assert "answer" in data
     assert "[E1]" in data["answer"]
+    assert data["answer"].startswith("In short:")
+    assert any(section["title"] == "What I can confirm" for section in data.get("sections", []))
 
 
 def test_code_analysis_no_llm_required(client, monkeypatch):

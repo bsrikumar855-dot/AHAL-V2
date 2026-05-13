@@ -30,6 +30,7 @@ from pydantic import BaseModel
 
 from app.analyze.router import analysis_router
 from app.chat.chat_engine import ChatEngine
+from app.chat.code_answering import build_code_chat_answer
 from app.chat.models import ChatAnswer, ChatRequest
 from app.changes import ChangeAnalysisRequest, ChangeImpactAnalyzer, ChangeImpactResult
 from app.code import CodeAnalyzer
@@ -465,45 +466,7 @@ def _build_pr_context(session_id: str):
 
 
 def _code_chat_answer(question: str, code_result) -> ChatAnswer:
-    from app.chat.models import EvidenceReference
-
-    q_lower = question.lower()
-    if "function" in q_lower and getattr(code_result, "detected_functions", []):
-        answer = (
-            f"The snippet defines these functions: {', '.join(code_result.detected_functions[:6])}. "
-            f"{code_result.summary} See evidence [E1]."
-        )
-    elif "class" in q_lower and getattr(code_result, "detected_classes", []):
-        answer = f"The snippet defines these classes or types: {', '.join(code_result.detected_classes[:6])}. See evidence [E1]."
-    elif "issue" in q_lower or "production" in q_lower:
-        if getattr(code_result, "issues", []):
-            answer = f"{'; '.join(code_result.issues[:4])} See evidence [E1]."
-        else:
-            answer = "No confirmed production blockers were proven from the snippet alone, but more testing and operational review would still be needed. See evidence [E1]."
-    elif "improve" in q_lower:
-        improvements = getattr(code_result, "suggested_improvements", [])
-        answer = f"Suggested improvements: {'; '.join(improvements[:4]) if improvements else 'Add tests, stronger error handling, and clearer structure where appropriate.'} See evidence [E1]."
-    else:
-        answer = f"{code_result.summary} See evidence [E1]."
-
-    evidence = [
-        EvidenceReference(
-            source_type="file",
-            source_id=getattr(item, "source_id", "snippet"),
-            file=None,
-            reason=getattr(item, "reason", "Analyzed the submitted snippet."),
-            snippet=getattr(item, "snippet", None),
-            confidence=getattr(code_result, "confidence", "medium"),
-        )
-        for item in getattr(code_result, "evidence", [])[:3]
-    ]
-    return ChatAnswer(
-        answer=answer,
-        confidence=getattr(code_result, "confidence", "medium"),
-        evidence=evidence,
-        warnings=list(getattr(code_result, "warnings", [])),
-        insufficient_context=False,
-    )
+    return build_code_chat_answer(question, code_result)
 
 
 # ── POST /analyze/upload ─────────────────────────────────────────

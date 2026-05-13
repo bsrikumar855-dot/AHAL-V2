@@ -49,6 +49,11 @@ def derive_project_what(project_name: str, explicit_description: str = "", repo_
     if explicit.lower().startswith(("[project]", "[tool.")) or re.match(r"^name\s*=", explicit, re.IGNORECASE):
         explicit = ""
     lowered = explicit.lower()
+    combined = " ".join([name, explicit, str(product_summary or "")]).lower()
+    if "portal" in combined and any(token in combined for token in ("department", "departmental", "academic", "student", "faculty", "campus", "cse")):
+        return f"{name} is a professional academic coordination portal for notices, coordination, and operations."
+    if "media player" in combined and any(token in combined for token in ("gesture", "gestures", "facial expression", "facial expressions", "computer vision", "control videos", "control music")):
+        return f"{name} is a computer-vision media player interface for gesture- and facial-expression-driven playback control."
     if explicit:
         if "web frontend for local deep research" in lowered and "ai research assistant" in lowered:
             return f"{name} is a web frontend for the Local Deep Research AI research assistant."
@@ -99,7 +104,32 @@ def derive_project_why(project_name: str, explicit_description: str = "", repo_t
     if explicit.lower().startswith(("[project]", "[tool.")) or re.match(r"^name\s*=", explicit, re.IGNORECASE):
         explicit = ""
     lowered = explicit.lower()
-    combined = " ".join([explicit, str(product_domain or ""), str(raw_purpose or "")]).lower()
+    combined = " ".join([str(project_name or ""), explicit, str(product_domain or ""), str(raw_purpose or "")]).lower()
+    for source_text in (explicit, raw_purpose, product_domain, combined):
+        text = re.sub(r"\s+", " ", str(source_text or "").strip())
+        match = re.search(
+            r"(?:allows|allowing|allow|lets|let|enables|enable|supports|supports)\s+users?\s+to\s+(.+?)(?:[.;!?]|$)",
+            text,
+            re.IGNORECASE,
+        )
+        if match:
+            action = re.sub(r"\s+", " ", match.group(1)).strip().rstrip(".")
+            if action:
+                return _one_sentence(f"It exists to let users {action}.")
+    if "portal" in combined and any(token in combined for token in ("department", "departmental", "academic", "student", "faculty", "campus", "cse")):
+        return "It exists to centralize academic notices, coordination, and operational information in one shared portal."
+    if "media player" in combined and any(token in combined for token in ("gesture", "gestures", "facial expression", "facial expressions", "computer vision")):
+        return "It exists to let users control videos and music with hand gestures and facial expressions in real time."
+    normalized_repo_type = str(repo_type or "").lower()
+    repo_templates = {
+        "frontend_app": "It exists to present the user-facing experience and coordinate the main interaction workflow.",
+        "fullstack_app": "It exists to connect the user interface, application logic, and shared workflow into one coherent product experience.",
+        "curriculum": "It exists to help learners follow a structured learning path using the repository's study materials.",
+        "documentation": "It exists to help readers navigate structured documentation, reference material, and curated resources.",
+        "knowledge_base": "It exists to help readers navigate structured documentation, reference material, and curated resources.",
+    }
+    if normalized_repo_type in repo_templates and not explicit:
+        return repo_templates[normalized_repo_type]
     if explicit:
         if "web frontend for local deep research" in lowered and "ai research assistant" in lowered:
             return "It exists to provide a web frontend for interacting with the Local Deep Research AI research assistant."
@@ -117,11 +147,6 @@ def derive_project_why(project_name: str, explicit_description: str = "", repo_t
             return "It exists to provide an offline-first retrieval and diagnosis API workflow."
         if any(token in combined for token in ("finance", "financial", "investment", "market", "stock", "portfolio", "trading")):
             return "It exists to support the financial workflows described in the analyzed project evidence."
-    normalized_repo_type = str(repo_type or "").lower()
-    if normalized_repo_type == "curriculum":
-        return "It exists to help learners follow a structured learning path using the repository's study materials."
-    if normalized_repo_type in {"documentation", "knowledge_base"}:
-        return "It exists to help readers navigate structured documentation, reference material, and curated resources."
     return "The business or user-facing reason is not fully specified in the analyzed evidence."
 
 

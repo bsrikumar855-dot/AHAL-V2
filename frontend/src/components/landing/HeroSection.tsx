@@ -1,4 +1,4 @@
-import { ArrowRight, FileCode2, GitBranchPlus, MessageSquareQuote, Sparkles, TestTube2 } from "lucide-react"
+import { ArrowRight, FileCode2, GitBranchPlus, MessageSquareQuote, TestTube2 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Button } from "../ui/Button"
@@ -18,10 +18,6 @@ export function HeroSection() {
     <section className="relative overflow-hidden px-4 pb-20 pt-24 md:px-8 md:pt-32">
       <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
         <ScrollReveal className="space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-100">
-            <Sparkles className="h-4 w-4" />
-            Validated project intelligence for serious engineering teams
-          </div>
 
           <div className="space-y-6">
             <h1 className="max-w-4xl text-5xl font-semibold tracking-[-0.04em] text-white md:text-7xl">
@@ -36,7 +32,7 @@ export function HeroSection() {
 
           <div className="flex flex-col gap-4 sm:flex-row">
             <MagneticButton>
-              <Link to="/analyze">
+              <Link to="/login">
                 <Button size="lg" icon={<ArrowRight className="h-4 w-4" />}>Start Analyzing</Button>
               </Link>
             </MagneticButton>

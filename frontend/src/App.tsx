@@ -6,7 +6,10 @@ import { AnalyzePage } from "./pages/AnalyzePage"
 import { ChatPage } from "./pages/ChatPage"
 import { DashboardPage } from "./pages/DashboardPage"
 import { DownloadsPage } from "./pages/DownloadsPage"
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage"
 import { LandingPage } from "./pages/LandingPage"
+import { LoginPage } from "./pages/LoginPage"
+import { SignupPage } from "./pages/SignupPage"
 import { SettingsPage } from "./pages/SettingsPage"
 
 function AnimatedRoutes() {
@@ -24,6 +27,9 @@ function AnimatedRoutes() {
       >
         <Routes location={location}>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route path="/analyze" element={<AnalyzePage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/:sessionId" element={<DashboardPage />} />

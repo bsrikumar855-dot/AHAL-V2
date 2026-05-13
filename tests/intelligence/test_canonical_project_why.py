@@ -63,6 +63,28 @@ def test_developer_tool_why_is_code_specific():
     assert "ecommerce" not in canonical.why.lower()
 
 
+def test_media_player_why_is_user_facing():
+    scan = make_scan_result(
+        files=[
+            {"path": "README.md", "extension": ".md"},
+            {"path": "app/main.py", "extension": ".py"},
+        ],
+        contents={
+            "README.md": (
+                "# AI Gesture Controlled Media Player\n\n"
+                "An interactive media player built using computer vision that allows users to control videos and music using hand gestures and facial expressions in real-time.\n"
+            ),
+            "app/main.py": 'from fastapi import FastAPI\napp = FastAPI()\n@app.get("/health")\ndef health(): pass\n',
+        },
+    )
+    intelligence = IntelligenceEngine().analyze(scan)
+    canonical = CanonicalProjectPresenter().build("session-why-media", scan, intelligence)
+
+    assert "control videos and music" in canonical.why.lower()
+    assert "hand gestures" in canonical.why.lower()
+    assert "reviewable implementation boundary" not in canonical.why.lower()
+
+
 def test_portal_why_is_outcome_focused():
     scan = make_scan_result(
         files=[
@@ -79,8 +101,8 @@ def test_portal_why_is_outcome_focused():
     intelligence = IntelligenceEngine().analyze(scan)
     canonical = CanonicalProjectPresenter().build("session-why-portal", scan, intelligence)
 
-    assert "centralize departmental notices" in canonical.why.lower()
-    assert "unified portal" in canonical.why.lower()
+    assert "centralize academic notices" in canonical.why.lower()
+    assert "shared portal" in canonical.why.lower()
     assert canonical.why != "It is intended to centralize the repository's core workflow within a maintainable, reviewable implementation boundary."
 
 

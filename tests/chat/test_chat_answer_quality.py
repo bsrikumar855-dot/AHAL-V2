@@ -86,6 +86,7 @@ def test_project_overview_answer_is_not_repeated_and_uncertainty_preserved():
     answer = composer.compose("What does this project do?", intent, context_pack)
     lowered = answer.answer.lower()
 
+    assert answer.answer.startswith("In short:")
     assert lowered.count("youtube distraction is organized as a backend api service built with python and flask. it exposes a /predict endpoint.") == 1
     assert "detailed but conservative summary centered on the repository's core workflow" in lowered
     assert [section.title for section in answer.sections] == ["What it is", "Detected architecture", "Key API", "What is uncertain"]

@@ -160,31 +160,46 @@ def build_intelligence_schema(session_id: str, session_type: str, scan_result: S
         project_name = identity.project_name or "This repository"
         base["project_name"] = project_name
         base["project_goal"] = clean_sentence(getattr(identity, "purpose_summary", "") or getattr(purpose, "summary", "") or _FALLBACK_TEXT)
+        fallback_source = " ".join(
+            [
+                str(getattr(identity, "purpose_summary", "") or ""),
+                str(base["project_goal"] or ""),
+                str(getattr(purpose, "summary", "") or ""),
+            ]
+        ).lower()
+        if repo_architecture == "backend" or "backend api service" in fallback_source or "backend service" in fallback_source:
+            fallback_why = "It exists to centralize the application's core logic and API handling behind a maintainable service boundary."
+        elif repo_architecture == "frontend" or "frontend application" in fallback_source:
+            fallback_why = "It exists to present the user-facing experience and coordinate the main interaction workflow."
+        elif repo_architecture == "fullstack" or "fullstack application" in fallback_source:
+            fallback_why = "It exists to connect the user interface, application logic, and shared workflow into one coherent product experience."
+        else:
+            fallback_why = derive_project_why(project_name, "", repo_type_hint, identity.domain or "", base["project_goal"])
         if repo_architecture == "frontend":
             base["summary"] = {
                 "what": clean_sentence(f"{project_name} is organized as a frontend application. It coordinates the user-facing interface, interaction flow, and supporting application behavior into a coherent product surface."),
-                "why": clean_sentence(derive_project_why(project_name, "", repo_type_hint, identity.domain or "", base["project_goal"])),
+                "why": clean_sentence(fallback_why),
                 "remaining": [],
                 "issues": [],
             }
         elif repo_architecture == "fullstack":
             base["summary"] = {
                 "what": clean_sentence(f"{project_name} is organized as a fullstack application. It connects the interface, application logic, and data flow into a coherent product workflow."),
-                "why": clean_sentence(derive_project_why(project_name, "", repo_type_hint, identity.domain or "", base["project_goal"])),
+                "why": clean_sentence(fallback_why),
                 "remaining": [],
                 "issues": [],
             }
         elif repo_architecture == "backend":
             base["summary"] = {
                 "what": clean_sentence(f"{project_name} is organized as a backend API service. It centralizes API handling, service logic, and data operations behind a maintainable service boundary."),
-                "why": clean_sentence(derive_project_why(project_name, "", repo_type_hint, identity.domain or "", base["project_goal"])),
+                "why": clean_sentence(fallback_why),
                 "remaining": [],
                 "issues": [],
             }
         else:
             base["summary"] = {
                 "what": clean_sentence(f"{project_name} is organized as a software project. It coordinates the repository's primary workflow and supporting implementation details."),
-                "why": clean_sentence(derive_project_why(project_name, "", repo_type_hint, identity.domain or "", base["project_goal"])),
+                "why": clean_sentence(fallback_why),
                 "remaining": [],
                 "issues": [],
             }

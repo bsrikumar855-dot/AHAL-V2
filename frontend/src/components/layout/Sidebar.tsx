@@ -20,12 +20,11 @@ export function Sidebar({ sessionId }: SidebarProps) {
     <>
       <aside className="hidden w-[270px] shrink-0 flex-col border-r border-white/8 bg-slate-950/40 p-6 backdrop-blur-xl lg:flex">
         <NavLink to="/" className="mb-10 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-500 text-base font-semibold text-slate-950">
-            A
+          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-white p-1">
+            <img src="/brand-logo.png" alt="AHAL AI Logo" className="h-full w-full object-contain" />
           </div>
           <div>
-            <p className="text-sm uppercase tracking-[0.32em] text-cyan-300/70">AHAL AI</p>
-            <p className="text-sm text-slate-400">Frontend v2</p>
+            <p className="text-base font-semibold uppercase tracking-[0.26em] text-cyan-300/70">AHAL AI</p>
           </div>
         </NavLink>
 

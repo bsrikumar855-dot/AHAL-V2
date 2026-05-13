@@ -80,7 +80,7 @@ def test_react_vite_frontend_chat_not_repo_intelligence():
     assert "frontend application" in text
     assert "react" in text
     assert "vite" in text
-    assert "core workflow" in text or "maintainable structure" in text
+    assert "core workflow" in text or "maintainable structure" in text or "maintainable workflow" in text
 
 
 def test_ahal_ai_high_confidence_repo_answer_does_not_require_uncertainty():

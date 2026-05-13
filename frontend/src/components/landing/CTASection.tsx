@@ -15,7 +15,7 @@ export function CTASection() {
               description="Start with a snippet, a folder, or a GitHub repository and move directly into validated project intelligence."
             />
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-              <Link to="/analyze">
+              <Link to="/login">
                 <Button size="lg">Start Analyzing</Button>
               </Link>
             </div>
